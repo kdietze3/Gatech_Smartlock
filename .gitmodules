@@ -1,3 +1,6 @@
 [submodule "Gatech_Smartlock"]
 	path = Gatech_Smartlock
 	url = https://github.com/kdietze3/Gatech_Smartlock
+[submodule "Android App/SmartLockProject"]
+	path = Android App/SmartLockProject
+	url = https://github.com/kdietze3/Gatech_Smartlock.git
