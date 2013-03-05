@@ -1,22 +1,37 @@
 /*
  Gatech SmartLock Controller
  
- */
-
-/*
-  WiFi Web Server LED Blink
+ Copyright (c) 2013 Kevin Dietze.
  
- A simple web server that lets you blink an LED via the web.
- This sketch will print the IP address of your WiFi Shield (once connected)
- to the Serial monitor. From there, you can open that address in a web browser
- to turn on and off the LED on pin 9.
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  
- If the IP address of your shield is yourAddress:
- http://yourAddress/H turns the LED on
- http://yourAddress/L turns it off
+ TODO
+ Wifi - Done
+ Bluetooth
+ NFC
+ Camera
+ iOS and Android Apps
+ Eletronic Door Strike
  
- This example is written for a network using WPA encryption. For 
- WEP or WPA, change the Wifi.begin() call accordingly.
+ Current Accepted Commands
+  * http://arduino_ip/?OPEN
+  * http://arduino_ip/?LOCK
  
  Circuit:
  * WiFi shield attached
@@ -29,6 +44,13 @@
 #include <WiFi.h>
 
 #define SPKR 5 //Digital pin for the PCS Speaker
+#define LED 9 //Digital pin for the LED
+
+int PIN_POT = A0;
+
+// led and potentiometer
+int led;
+int pot;
 
 char ssid[] = "Smart";      //  your network SSID (name) 
 char pass[] = "oxford2012";   // your network password
@@ -57,7 +79,7 @@ void beepMultiple(unsigned int numTimes, unsigned char delayms){
 }
 
 void setup() {
-  Serial.begin(9600);      // initialize serial communication
+  Serial.begin(115200);      // initialize serial communication for Android
   pinMode(9, OUTPUT);      // set the LED pin mode
   pinMode(SPKR, OUTPUT);
 
@@ -79,13 +101,63 @@ void setup() {
     delay(4000);
   } 
   server.begin();                           // start the web server on port 80
-  printWifiStatus();                        // you're connected now, so print out the status
+  //printWifiStatus();                        // you're connected now, so print out the status
   beepMultiple(3,50);
 }
 
-
+//Arduino version of main()
 void loop() {
   wifiFullLineCommands();
+  bluetoothCommands();
+}
+
+void bluetoothCommands(){
+  
+
+  if(Serial.available()>0)
+  {
+    // Serial.read() reads one byte
+    led = Serial.read();
+    
+  }
+ 
+ if(led == 1){
+    executeCommand("LOCK");
+    led = 0;
+ }
+  else if (led == 2){
+    executeCommand("OPEN");
+    led = 0;
+  }
+}
+
+//Execute recieved command. Currently in if/elseif form because I am unsure if
+//Arduino can switch on Strings.
+void executeCommand(String command){
+ 
+  if(command == "OPEN"){
+    unlock();
+  }
+  else if(command == "LOCK"){
+    lock();
+  }
+}
+
+
+//Lock the door and output and play debug codes
+void lock(){
+   //Serial.println("Locking door");
+   digitalWrite(LED,HIGH);
+   Serial.write(1);
+   beepMultiple(2,300);
+}
+
+//Unlock the door and output and show debug codes
+void unlock(){
+  //Serial.println("Unlocking door");
+  digitalWrite(LED,LOW);
+  Serial.write(2);
+  beepMultiple(2,300);
 }
 
 
@@ -115,7 +187,7 @@ void wifiFullLineCommands(){
         if(c == '?') reading = true; //found the ?, begin reading the info
 
         if(reading){
-          Serial.print(c);
+          //Serial.print(c);
           if(c != '?'){
            command += c;
           }
@@ -134,6 +206,12 @@ void wifiFullLineCommands(){
       }
     }
     client.println(command);
+    
+    //Execute recieved command
+    executeCommand(command);
+    //Reset Command to an empty string
+    command = "";
+    
     delay(1); // give the web browser time to receive the data
     client.stop(); // close the connection:
 
