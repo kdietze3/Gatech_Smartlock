@@ -1,0 +1,3 @@
+[submodule "Gatech_Smartlock"]
+	path = Gatech_Smartlock
+	url = https://github.com/kdietze3/Gatech_Smartlock
