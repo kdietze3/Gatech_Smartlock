@@ -23,7 +23,7 @@
  
  TODO
  Wifi - Done
- Bluetooth
+ Bluetooth - Done
  NFC
  Camera
  iOS and Android Apps
@@ -36,10 +36,18 @@
  Circuit:
  * WiFi shield attached
  * LED attached to pin 9
+ * Bluetooth TX to pin 0
+ * Bluetooth RX to pin 1
  
- created 25 Nov 2012
- by Tom Igoe
- */
+ ******************************************
+ SUPER IMPORTANT!!!!!!
+
+  In order to upload the Arduino sketch you must first disconnect pin 0
+   on the Arduino circuit. It will fail every time if you dont.
+  
+  ******************************
+  
+  */
 #include <SPI.h>
 #include <WiFi.h>
 
