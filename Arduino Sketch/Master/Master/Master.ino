@@ -53,6 +53,7 @@
 
 #define SPKR 5 //Digital pin for the PCS Speaker
 #define LED 9 //Digital pin for the LED
+#define LOCK 13 //Digital pin for the Strike Lock
 
 int PIN_POT = A0;
 
@@ -90,6 +91,7 @@ void setup() {
   Serial.begin(115200);      // initialize serial communication for Android
   pinMode(9, OUTPUT);      // set the LED pin mode
   pinMode(SPKR, OUTPUT);
+  pinMode(LOCK, OUTPUT);
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -157,13 +159,16 @@ void lock(){
    //Serial.println("Locking door");
    digitalWrite(LED,HIGH);
    Serial.write(1);
+   digitalWrite(LOCK,LOW);
    beepMultiple(2,300);
+   
 }
 
 //Unlock the door and output and show debug codes
 void unlock(){
   //Serial.println("Unlocking door");
   digitalWrite(LED,LOW);
+  digitalWrite(LOCK,HIGH);
   Serial.write(2);
   beepMultiple(2,300);
 }
